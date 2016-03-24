@@ -24,6 +24,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     var bottomText: UITextField!
     var topTextIsDefault = true
     var bottomTextIsDefault = true
+    var expanded = false
     
     var toast: UIView!
     var toastAlert: UILabel!
@@ -122,19 +123,40 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         meme.topText = topText.text!
         meme.bottomText = bottomText.text!
         meme.image = imagePickerView.image
-        
+        meme.memeImage = generateMemedImage()
         
         if meme.image == nil {
             showToast(4.0, message: "Please select a photo before sharing")
             return
         }
         
-        var avc = UIActivityViewController(activityItems: [meme.image], applicationActivities: nil)
+        var avc = UIActivityViewController(activityItems: [meme.memeImage], applicationActivities: nil)
         self.presentViewController(avc, animated: true, completion: nil)
     }
     
     func memeShared() {
         dismissViewControllerAnimated(false, completion: nil)
+    }
+    
+    func generateMemedImage() -> UIImage {
+        
+        // Hide toolbar and navbar
+        self.shareButton.hidden = true
+        self.toolBar.hidden = true
+        
+        // Render view to an image
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        view.drawViewHierarchyInRect(self.view.frame,
+                                     afterScreenUpdates: true)
+        let memedImage : UIImage =
+            UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // Show toolbar and navbar
+        self.shareButton.hidden = false
+        self.toolBar.hidden = false
+        
+        return memedImage
     }
     
     ///////////////////////////////////////
@@ -189,11 +211,19 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     // functions for handling sliding the view as the keyboard is shown/hidden
     
     @objc func keyboardWillShow(notification: NSNotification) {
-        self.view.frame.origin.y -= getKeyboardHeight(notification)
+        for thisView in self.view.subviews {
+            if thisView.isFirstResponder() == true && thisView.tag == 1 {
+                self.view.frame.origin.y -= getKeyboardHeight(notification)
+                self.expanded = true
+            }
+        }
     }
     
     @objc func keyboardWillHide(notification: NSNotification) {
-        self.view.frame.origin.y += getKeyboardHeight(notification)
+        if self.expanded == true {
+            self.view.frame.origin.y += getKeyboardHeight(notification)
+            self.expanded = false
+        }
     }
     
     func getKeyboardHeight(notification: NSNotification) -> CGFloat {
