@@ -27,6 +27,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // note: I create all the UI elements 100% programmatically.
         let screenSize = UIScreen.mainScreen().bounds
         let screenWidth = screenSize.width
         let screenHeight = screenSize.height
@@ -77,7 +79,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         self.topText.delegate = self
         self.bottomText.delegate = self
         
-        
+        // add all elements to the view
         self.view.addSubview(imagePickerView)
         self.view.addSubview(shareButton)
         self.view.addSubview(toolBar)
@@ -93,7 +95,6 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -101,6 +102,9 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         unsubscribeFromKeyboardNotifications()
     }
     
+    ///////////////////////////////////////
+    // saving the meme!
+
     func save() {
         
         var meme = Meme()
@@ -108,8 +112,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         meme.bottomText = bottomText.text!
         meme.image = imagePickerView.image!
         
-        var activityView = UIActivityViewController(activityItems: [meme.image], applicationActivities: nil)
-        self.presentViewController(activityView, animated: true, completion: nil)
+        var avc = UIActivityViewController(activityItems: [meme.image], applicationActivities: nil)
+        self.presentViewController(avc, animated: true, completion: nil)
     }
     
     func memeShared() {
@@ -130,12 +134,12 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
         imagePicker.sourceType = UIImagePickerControllerSourceType.Camera
-
         presentViewController(imagePicker, animated: true, completion: nil)
     }
 
     ///////////////////////////////////////
     // functions for textfielddelegate
+    
     
     func textFieldDidBeginEditing(textField: UITextField) {
         if textField.tag == 0 {
