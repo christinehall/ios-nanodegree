@@ -25,6 +25,9 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     var topTextIsDefault = true
     var bottomTextIsDefault = true
     
+    var toast: UIView!
+    var toastAlert: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -34,6 +37,13 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         let screenHeight = screenSize.height
         
         self.view.backgroundColor = UIColor.darkGrayColor()
+        
+        toast = UIView(frame: CGRectMake(0,-65,screenWidth,65))
+        toast.backgroundColor = UIColor.yellowColor()
+        toastAlert = UILabel(frame: CGRectMake(10,10, screenWidth,40))
+        toastAlert.text = "No alert at this time"
+        toastAlert.textAlignment = .Center
+        toast.addSubview(toastAlert)
         
         imagePickerView = UIImageView(frame: CGRectMake(0, 0, screenWidth, screenHeight))
         
@@ -48,7 +58,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         // add buttons to the toolbar to pick or take a photo
         let pickButton = UIBarButtonItem(title:"Pick", style: UIBarButtonItemStyle.Plain, target: self, action: "pickAnImage:")
-        let cameraButton = UIBarButtonItem(title:"Take a Photo", style: UIBarButtonItemStyle.Plain, target: self, action: "pickAnImageFromCamera:")
+        let cameraButton = UIBarButtonItem(title:"Take a Photo", style: UIBarButtonItemStyle.Bordered , target: self, action: "pickAnImageFromCamera:")
         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
         toolBar.setItems([pickButton, cameraButton], animated: true)
         
@@ -85,6 +95,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         self.view.addSubview(toolBar)
         self.view.addSubview(topText)
         self.view.addSubview(bottomText)
+        self.view.addSubview(toast)
 
     }
     
@@ -110,7 +121,13 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         var meme = Meme()
         meme.topText = topText.text!
         meme.bottomText = bottomText.text!
-        meme.image = imagePickerView.image!
+        meme.image = imagePickerView.image
+        
+        
+        if meme.image == nil {
+            showToast(4.0, message: "Please select a photo before sharing")
+            return
+        }
         
         var avc = UIActivityViewController(activityItems: [meme.image], applicationActivities: nil)
         self.presentViewController(avc, animated: true, completion: nil)
@@ -205,16 +222,37 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             imagePickerView.image = image
             imagePickerView.contentMode = UIViewContentMode.ScaleAspectFit
-            
         }
-    
     }
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
         print("Cancelled image picker!")
         dismissViewControllerAnimated(true, completion: nil)
     }
-
+    
+    ///////////////////////////////////////
+    // toasting function
+    
+    func showToast(time: Double, message: String) {
+        UIView.animateWithDuration(0.2) {
+            self.toastAlert.text = message
+            self.toast.frame.origin.y += 65
+            self.delay(time) {
+                UIView.animateWithDuration(0.2) {
+                    self.toast.frame.origin.y -= 65
+                }
+            }
+        }
+    }
+    
+    func delay(delay:Double, closure:()->()) {
+        dispatch_after(
+            dispatch_time(
+                DISPATCH_TIME_NOW,
+                Int64(delay * Double(NSEC_PER_SEC))
+            ),
+            dispatch_get_main_queue(), closure)
+    }
 
 }
 
