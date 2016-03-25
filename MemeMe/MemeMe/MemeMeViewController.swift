@@ -8,14 +8,7 @@
 
 import UIKit
 
-struct Meme {
-    var topText: String!
-    var bottomText: String!
-    var image: UIImage!
-    var memeImage: UIImage!
-}
-
-class MainViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
+class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
     var imagePickerView: UIImageView!
     var shareButton: UIButton!
@@ -26,6 +19,9 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     var bottomTextIsDefault = true
     var expanded = false
     
+    var screenWidth: CGFloat!
+    var screenHeight: CGFloat!
+    
     var toast: UIView!
     var toastAlert: UILabel!
     
@@ -34,70 +30,18 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         
         // note: I create all the UI elements 100% programmatically.
         let screenSize = UIScreen.mainScreen().bounds
-        let screenWidth = screenSize.width
-        let screenHeight = screenSize.height
+        screenWidth = screenSize.width
+        screenHeight = screenSize.height
         
-        self.view.backgroundColor = UIColor.darkGrayColor()
-        
-        toast = UIView(frame: CGRectMake(0,-65,screenWidth,65))
-        toast.backgroundColor = UIColor.yellowColor()
-        toastAlert = UILabel(frame: CGRectMake(10,10, screenWidth,40))
-        toastAlert.text = "No alert at this time"
-        toastAlert.textAlignment = .Center
-        toast.addSubview(toastAlert)
-        
+        view.backgroundColor = UIColor.darkGrayColor()
         imagePickerView = UIImageView(frame: CGRectMake(0, 0, screenWidth, screenHeight))
+        view.addSubview(imagePickerView)
         
-        shareButton = UIButton(frame: CGRectMake(20, 20, 50, 50))
-        shareButton.setTitle("Share", forState: .Normal)
-        shareButton.addTarget(self, action: "save", forControlEvents: UIControlEvents.TouchUpInside)
+        setupShareButton()
+        setupToolBar()
+        setupTextFields()
+        setupToast()
         
-        toolBar = UIToolbar()
-        toolBar.frame = CGRectMake(0, self.view.frame.size.height - 46, self.view.frame.size.width, 46)
-        toolBar.sizeToFit()
-        toolBar.backgroundColor = UIColor.darkGrayColor()
-        
-        // add buttons to the toolbar to pick or take a photo
-        let pickButton = UIBarButtonItem(title:"Pick", style: UIBarButtonItemStyle.Plain, target: self, action: "pickAnImage:")
-        let cameraButton = UIBarButtonItem(title:"Take a Photo", style: UIBarButtonItemStyle.Bordered , target: self, action: "pickAnImageFromCamera:")
-        cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
-        toolBar.setItems([pickButton, cameraButton], animated: true)
-        
-        // set the text attributes for our text fields
-        let memeTextAttributes = [
-            NSStrokeColorAttributeName : UIColor.blackColor(),
-            NSForegroundColorAttributeName : UIColor.whiteColor(),
-            NSFontAttributeName : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
-            NSStrokeWidthAttributeName : -5
-        ]
-        
-        // labels for top and bottom 
-        topText = UITextField(frame: CGRectMake(30, screenHeight/4, screenWidth - 60, 40))
-        topText.text = "TOP"
-        topText.contentVerticalAlignment = .Center
-        topText.textAlignment = .Center
-        topText.tag = 0
-        topText.defaultTextAttributes = memeTextAttributes
-        
-        bottomText = UITextField(frame: CGRectMake(30, screenHeight/4*3, screenWidth - 60, 40))
-        bottomText.text = "BOTTOM"
-        bottomText.contentVerticalAlignment = .Center
-        bottomText.textAlignment = .Center
-        bottomText.tag = 1
-        bottomText.defaultTextAttributes = memeTextAttributes
-        
-        // make sure delegates are set to self
-        self.topText.delegate = self
-        self.bottomText.delegate = self
-        
-        // add all elements to the view
-        self.view.addSubview(imagePickerView)
-        self.view.addSubview(shareButton)
-        self.view.addSubview(toolBar)
-        self.view.addSubview(topText)
-        self.view.addSubview(bottomText)
-        self.view.addSubview(toast)
-
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -112,6 +56,74 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeFromKeyboardNotifications()
+    }
+    
+    func setupToast() {
+        toast = UIView(frame: CGRectMake(0,-65,screenWidth,65))
+        toast.backgroundColor = UIColor.yellowColor()
+        toastAlert = UILabel(frame: CGRectMake(10,10, screenWidth,40))
+        toastAlert.text = "No alert at this time"
+        toastAlert.textAlignment = .Center
+        toast.addSubview(toastAlert)
+        view.addSubview(toast)
+
+    }
+    
+    func setupToolBar() {
+        toolBar = UIToolbar()
+        toolBar.frame = CGRectMake(0, view.frame.size.height - 46, view.frame.size.width, 46)
+        toolBar.sizeToFit()
+        toolBar.backgroundColor = UIColor.darkGrayColor()
+        
+        // add buttons to the toolbar to pick or take a photo
+        let pickButton = UIBarButtonItem(title:"Pick", style: UIBarButtonItemStyle.Plain, target: self, action: "pickAnImage:")
+        let cameraButton = UIBarButtonItem(title:"Take a Photo", style: UIBarButtonItemStyle.Bordered , target: self, action: "pickAnImageFromCamera:")
+        cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
+        toolBar.setItems([pickButton, cameraButton], animated: true)
+        
+        view.addSubview(toolBar)
+    }
+    
+    func setupTextFields() {
+        
+        // set the text attributes for our text fields
+        let memeTextAttributes = [
+            NSStrokeColorAttributeName : UIColor.blackColor(),
+            NSForegroundColorAttributeName : UIColor.whiteColor(),
+            NSFontAttributeName : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            NSStrokeWidthAttributeName : -5
+        ]
+        
+        // labels for top and bottom
+        topText = UITextField(frame: CGRectMake(30, screenHeight/4, screenWidth - 60, 40))
+        topText.text = "TOP"
+        topText.contentVerticalAlignment = .Center
+        topText.textAlignment = .Center
+        topText.tag = 0
+        topText.defaultTextAttributes = memeTextAttributes
+        
+        bottomText = UITextField(frame: CGRectMake(30, screenHeight/4*3, screenWidth - 60, 40))
+        bottomText.text = "BOTTOM"
+        bottomText.contentVerticalAlignment = .Center
+        bottomText.textAlignment = .Center
+        bottomText.tag = 1
+        bottomText.defaultTextAttributes = memeTextAttributes
+
+        topText.delegate = self
+        bottomText.delegate = self
+
+        view.addSubview(topText)
+        view.addSubview(bottomText)
+        
+    }
+    
+    func setupShareButton() {
+        shareButton = UIButton(frame: CGRectMake(20, 20, 50, 50))
+        shareButton.setTitle("Share", forState: .Normal)
+        shareButton.addTarget(self, action: "save", forControlEvents: UIControlEvents.TouchUpInside)
+        
+        view.addSubview(shareButton)
+
     }
     
     ///////////////////////////////////////
@@ -131,7 +143,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         }
         
         var avc = UIActivityViewController(activityItems: [meme.memeImage], applicationActivities: nil)
-        self.presentViewController(avc, animated: true, completion: nil)
+        presentViewController(avc, animated: true, completion: nil)
     }
     
     func memeShared() {
@@ -141,20 +153,20 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     func generateMemedImage() -> UIImage {
         
         // Hide toolbar and navbar
-        self.shareButton.hidden = true
-        self.toolBar.hidden = true
+        shareButton.hidden = true
+        toolBar.hidden = true
         
         // Render view to an image
-        UIGraphicsBeginImageContext(self.view.frame.size)
-        view.drawViewHierarchyInRect(self.view.frame,
+        UIGraphicsBeginImageContext(view.frame.size)
+        view.drawViewHierarchyInRect(view.frame,
                                      afterScreenUpdates: true)
         let memedImage : UIImage =
             UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
         // Show toolbar and navbar
-        self.shareButton.hidden = false
-        self.toolBar.hidden = false
+        shareButton.hidden = false
+        toolBar.hidden = false
         
         return memedImage
     }
@@ -211,18 +223,18 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate, UIN
     // functions for handling sliding the view as the keyboard is shown/hidden
     
     @objc func keyboardWillShow(notification: NSNotification) {
-        for thisView in self.view.subviews {
+        for thisView in view.subviews {
             if thisView.isFirstResponder() == true && thisView.tag == 1 {
-                self.view.frame.origin.y -= getKeyboardHeight(notification)
-                self.expanded = true
+                view.frame.origin.y -= getKeyboardHeight(notification)
+                expanded = true
             }
         }
     }
     
     @objc func keyboardWillHide(notification: NSNotification) {
-        if self.expanded == true {
-            self.view.frame.origin.y += getKeyboardHeight(notification)
-            self.expanded = false
+        if expanded == true {
+            view.frame.origin.y += getKeyboardHeight(notification)
+            expanded = false
         }
     }
     

@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E6337611CA4D52100543BC3 /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6337601CA4D52100543BC3 /* Meme.swift */; };
 		1EE50CF71CA39A6C005DE1E6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE50CF61CA39A6C005DE1E6 /* AppDelegate.swift */; };
-		1EE50CF91CA39A6C005DE1E6 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE50CF81CA39A6C005DE1E6 /* MainViewController.swift */; };
+		1EE50CF91CA39A6C005DE1E6 /* MemeMeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EE50CF81CA39A6C005DE1E6 /* MemeMeViewController.swift */; };
 		1EE50CFC1CA39A6C005DE1E6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1EE50CFA1CA39A6C005DE1E6 /* Main.storyboard */; };
 		1EE50CFF1CA39A6C005DE1E6 /* MemeMe.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1EE50CFD1CA39A6C005DE1E6 /* MemeMe.xcdatamodeld */; };
 		1EE50D011CA39A6C005DE1E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1EE50D001CA39A6C005DE1E6 /* Assets.xcassets */; };
@@ -35,9 +36,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E6337601CA4D52100543BC3 /* Meme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
 		1EE50CF31CA39A6C005DE1E6 /* MemeMe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemeMe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1EE50CF61CA39A6C005DE1E6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		1EE50CF81CA39A6C005DE1E6 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		1EE50CF81CA39A6C005DE1E6 /* MemeMeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemeMeViewController.swift; sourceTree = "<group>"; };
 		1EE50CFB1CA39A6C005DE1E6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1EE50CFE1CA39A6C005DE1E6 /* MemeMe.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MemeMe.xcdatamodel; sourceTree = "<group>"; };
 		1EE50D001CA39A6C005DE1E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -100,8 +102,9 @@
 			isa = PBXGroup;
 			children = (
 				1EE50CF61CA39A6C005DE1E6 /* AppDelegate.swift */,
-				1EE50CF81CA39A6C005DE1E6 /* MainViewController.swift */,
+				1EE50CF81CA39A6C005DE1E6 /* MemeMeViewController.swift */,
 				1EE50CFA1CA39A6C005DE1E6 /* Main.storyboard */,
+				1E6337601CA4D52100543BC3 /* Meme.swift */,
 				1EE50D001CA39A6C005DE1E6 /* Assets.xcassets */,
 				1EE50D021CA39A6C005DE1E6 /* LaunchScreen.storyboard */,
 				1EE50D051CA39A6C005DE1E6 /* Info.plist */,
@@ -260,7 +263,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1EE50CFF1CA39A6C005DE1E6 /* MemeMe.xcdatamodeld in Sources */,
-				1EE50CF91CA39A6C005DE1E6 /* MainViewController.swift in Sources */,
+				1E6337611CA4D52100543BC3 /* Meme.swift in Sources */,
+				1EE50CF91CA39A6C005DE1E6 /* MemeMeViewController.swift in Sources */,
 				1EE50CF71CA39A6C005DE1E6 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -488,6 +492,7 @@
 				1EE50D201CA39A6C005DE1E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1EE50D211CA39A6C005DE1E6 /* Build configuration list for PBXNativeTarget "MemeMeTests" */ = {
 			isa = XCConfigurationList;
@@ -496,6 +501,7 @@
 				1EE50D231CA39A6C005DE1E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1EE50D241CA39A6C005DE1E6 /* Build configuration list for PBXNativeTarget "MemeMeUITests" */ = {
 			isa = XCConfigurationList;
@@ -504,6 +510,7 @@
 				1EE50D261CA39A6C005DE1E6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
