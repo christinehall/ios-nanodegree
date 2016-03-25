@@ -11,19 +11,18 @@ import UIKit
 class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
     var imagePickerView: UIImageView!
-    var shareButton: UIButton!
+    var shareButton: UIBarButtonItem!
     var toolBar: UIToolbar!
     var topText: UITextField!
     var bottomText: UITextField!
+    var navBar: UIToolbar!
+    
     var topTextIsDefault = true
     var bottomTextIsDefault = true
     var expanded = false
     
     var screenWidth: CGFloat!
     var screenHeight: CGFloat!
-    
-    var toast: UIView!
-    var toastAlert: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,36 +36,49 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         imagePickerView = UIImageView(frame: CGRectMake(0, 0, screenWidth, screenHeight))
         view.addSubview(imagePickerView)
         
-        setupShareButton()
+        setupNavBar()
         setupToolBar()
         setupTextFields()
-        setupToast()
         
+        view.addSubview(navBar)
+        view.addSubview(toolBar)
+        view.addSubview(topText)
+        view.addSubview(bottomText)
+
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         subscribeToKeyboardNotifications()
+        subscribeToRotationNotifications()
+
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeFromKeyboardNotifications()
+        unsubscribeToRotationNotifications()
+
     }
     
-    func setupToast() {
-        toast = UIView(frame: CGRectMake(0,-65,screenWidth,65))
-        toast.backgroundColor = UIColor.yellowColor()
-        toastAlert = UILabel(frame: CGRectMake(10,10, screenWidth,40))
-        toastAlert.text = "No alert at this time"
-        toastAlert.textAlignment = .Center
-        toast.addSubview(toastAlert)
-        view.addSubview(toast)
+    ///////////////////////////////////////
+    // UI setup
+    
+    func resizeElements() {
+        navBar.frame = CGRectMake(0,0, screenWidth, 65)
+        topText.frame = CGRectMake(30, screenHeight/4, screenWidth - 60, 40)
+        bottomText.frame = CGRectMake(30, screenHeight/4*3, screenWidth - 60, 40)
+        toolBar.frame = CGRectMake(0, view.frame.size.height - 46, view.frame.size.width, 46)
+        imagePickerView.frame = CGRectMake(0, 0, screenWidth, screenHeight)
+    }
+    
 
+    func setupNavBar() {
+        navBar = UIToolbar(frame: CGRectMake(0,0,screenWidth,65))
+        shareButton = UIBarButtonItem(title: "Share", style: .Plain, target: self, action: "share:")
+        shareButton.enabled = false
+        navBar.setItems([shareButton], animated: true)
+        
     }
     
     func setupToolBar() {
@@ -77,11 +89,13 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         
         // add buttons to the toolbar to pick or take a photo
         let pickButton = UIBarButtonItem(title:"Pick", style: UIBarButtonItemStyle.Plain, target: self, action: "pickAnImage:")
-        let cameraButton = UIBarButtonItem(title:"Take a Photo", style: UIBarButtonItemStyle.Bordered , target: self, action: "pickAnImageFromCamera:")
+        pickButton.tag = 0
+        
+        let cameraButton = UIBarButtonItem(title:"Take a Photo", style: UIBarButtonItemStyle.Bordered , target: self, action: "pickAnImage:")
+        cameraButton.tag = 0
         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
         toolBar.setItems([pickButton, cameraButton], animated: true)
         
-        view.addSubview(toolBar)
     }
     
     func setupTextFields() {
@@ -97,39 +111,32 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         // labels for top and bottom
         topText = UITextField(frame: CGRectMake(30, screenHeight/4, screenWidth - 60, 40))
         topText.text = "TOP"
-        topText.contentVerticalAlignment = .Center
-        topText.textAlignment = .Center
         topText.tag = 0
         topText.defaultTextAttributes = memeTextAttributes
-        
+        topText.textAlignment = NSTextAlignment.Center
+
         bottomText = UITextField(frame: CGRectMake(30, screenHeight/4*3, screenWidth - 60, 40))
         bottomText.text = "BOTTOM"
-        bottomText.contentVerticalAlignment = .Center
-        bottomText.textAlignment = .Center
         bottomText.tag = 1
         bottomText.defaultTextAttributes = memeTextAttributes
+        bottomText.textAlignment = .Center
 
         topText.delegate = self
         bottomText.delegate = self
-
-        view.addSubview(topText)
-        view.addSubview(bottomText)
-        
     }
     
-    func setupShareButton() {
-        shareButton = UIButton(frame: CGRectMake(20, 20, 50, 50))
-        shareButton.setTitle("Share", forState: .Normal)
-        shareButton.addTarget(self, action: "save", forControlEvents: UIControlEvents.TouchUpInside)
-        
-        view.addSubview(shareButton)
-
+    func rotated() {
+        let screenSize = UIScreen.mainScreen().bounds
+        screenWidth = screenSize.width
+        screenHeight = screenSize.height
+        print(screenWidth, screenHeight)
+        resizeElements()
     }
     
     ///////////////////////////////////////
     // saving the meme!
 
-    func save() {
+    @objc func share(sender: AnyObject) {
         
         var meme = Meme()
         meme.topText = topText.text!
@@ -137,23 +144,19 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         meme.image = imagePickerView.image
         meme.memeImage = generateMemedImage()
         
-        if meme.image == nil {
-            showToast(4.0, message: "Please select a photo before sharing")
-            return
-        }
-        
-        var avc = UIActivityViewController(activityItems: [meme.memeImage], applicationActivities: nil)
+        let avc = UIActivityViewController(activityItems: [meme.memeImage], applicationActivities: nil)
         presentViewController(avc, animated: true, completion: nil)
-    }
-    
-    func memeShared() {
-        dismissViewControllerAnimated(false, completion: nil)
+        avc.completionWithItemsHandler = { (activity: String?, completed: Bool, items: [AnyObject]?, error: NSError?) -> Void in
+            if completed {
+                self.dismissViewControllerAnimated(true, completion: nil)
+                self.clearAll()
+            }
+        }
     }
     
     func generateMemedImage() -> UIImage {
         
         // Hide toolbar and navbar
-        shareButton.hidden = true
         toolBar.hidden = true
         
         // Render view to an image
@@ -165,26 +168,33 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         UIGraphicsEndImageContext()
         
         // Show toolbar and navbar
-        shareButton.hidden = false
         toolBar.hidden = false
         
         return memedImage
+    }
+    
+    func clearAll() {
+        imagePickerView.image = nil
+        topText.text = "TOP"
+        bottomText.text = "BOTTOM"
+        topTextIsDefault = true
+        bottomTextIsDefault = true
+        shareButton.enabled = false
     }
     
     ///////////////////////////////////////
     // functions for image picking
 
     @objc func pickAnImage(sender: AnyObject) {
+        
+        var type = UIImagePickerControllerSourceType.Camera
+        if sender.tag == 0 {
+            print("Changing type to Photo Library!")
+            type = UIImagePickerControllerSourceType.PhotoLibrary
+        }
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
-        imagePicker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
-        presentViewController(imagePicker, animated: true, completion: nil)
-    }
-    
-    @objc func pickAnImageFromCamera (sender: AnyObject) {
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.sourceType = UIImagePickerControllerSourceType.Camera
+        imagePicker.sourceType = type
         presentViewController(imagePicker, animated: true, completion: nil)
     }
 
@@ -254,6 +264,14 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
             UIKeyboardWillShowNotification, object: nil)
     }
     
+    func subscribeToRotationNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "rotated", name: UIDeviceOrientationDidChangeNotification, object: nil)
+    }
+    
+    func unsubscribeToRotationNotifications() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIDeviceOrientationDidChangeNotification, object: nil)
+    }
+    
     ///////////////////////////////////////
     // functions for UIImageickerControllerDelegate
     
@@ -264,6 +282,8 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
             imagePickerView.image = image
             imagePickerView.contentMode = UIViewContentMode.ScaleAspectFit
+            shareButton.enabled = true
+            
         }
     }
     
@@ -272,29 +292,5 @@ class MemeMeViewController: UIViewController, UIImagePickerControllerDelegate, U
         dismissViewControllerAnimated(true, completion: nil)
     }
     
-    ///////////////////////////////////////
-    // toasting function
-    
-    func showToast(time: Double, message: String) {
-        UIView.animateWithDuration(0.2) {
-            self.toastAlert.text = message
-            self.toast.frame.origin.y += 65
-            self.delay(time) {
-                UIView.animateWithDuration(0.2) {
-                    self.toast.frame.origin.y -= 65
-                }
-            }
-        }
-    }
-    
-    func delay(delay:Double, closure:()->()) {
-        dispatch_after(
-            dispatch_time(
-                DISPATCH_TIME_NOW,
-                Int64(delay * Double(NSEC_PER_SEC))
-            ),
-            dispatch_get_main_queue(), closure)
-    }
-
 }
 
